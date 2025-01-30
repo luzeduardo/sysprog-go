@@ -6,8 +6,19 @@ import (
 )
 
 func main() {
-	mainC1P43Mutexes()
+	mainC1Channel()
+	// mainC1P43Mutexes()
+}
 
+func mainC1Channel() {
+	balls := make(chan string)
+	go throwBalls("red", balls)
+	fmt.Println(<-balls, "received")
+}
+
+func throwBalls(color string, balls chan string) {
+	fmt.Printf("throwing the %s ball\n", color)
+	balls <- color
 }
 
 func mainC1P43Mutexes() {
