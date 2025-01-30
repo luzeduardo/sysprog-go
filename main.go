@@ -6,8 +6,35 @@ import (
 )
 
 func main() {
-	mainC1Channel()
+	mainC1ChannelWaitGroup()
+	// mainC1Channel()
 	// mainC1P43Mutexes()
+}
+
+func mainC1ChannelWaitGroup() {
+	balls := make(chan string)
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
+	go func() {
+		defer wg.Done()
+		throwBalls("red", balls)
+	}()
+
+	go func() {
+		defer wg.Done()
+		throwBalls("blue", balls)
+	}()
+
+	go func() {
+		wg.Wait()
+		// close the channel after the goroutines are done
+		close(balls)
+	}()
+
+	for color := range balls {
+		fmt.Printf("%s ball received\n", color)
+	}
 }
 
 func mainC1Channel() {
