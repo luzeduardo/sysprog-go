@@ -2,16 +2,33 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
 	"sync"
 	"time"
 )
 
 func main() {
-	mainC1P35SignalingChannel()
+	mainC3P45ManipulatingProcesses()
+	// mainC1P35SignalingChannel()
 	// mainC1P30BufferedChannels()
 	// mainC1ChannelWaitGroup()
 	// mainC1Channel()
 	// mainC1P22Mutexes()
+}
+
+func mainC3P45ManipulatingProcesses() {
+	cmd := exec.Command("ls", "-l")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	//get the process id
+	pid := os.Getpid()
+	fmt.Println("Process ID: ", pid)
 }
 
 func mainC1P35SignalingChannel() {
