@@ -9,12 +9,25 @@ import (
 )
 
 func main() {
-	mainC3P45ManipulatingProcesses()
+	mainC3P54CliStdStreams()
+	// mainC3P45ManipulatingProcesses()
 	// mainC1P35SignalingChannel()
 	// mainC1P30BufferedChannels()
 	// mainC1ChannelWaitGroup()
 	// mainC1Channel()
 	// mainC1P22Mutexes()
+}
+
+func mainC3P54CliStdStreams() {
+	words := os.Args[1:]
+	if len(words) == 0 {
+		fmt.Fprintln(os.Stderr, "No words provided")
+		os.Exit(1)
+	} else {
+		for _, word := range words {
+			fmt.Fprintln(os.Stdout, word)
+		}
+	}
 }
 
 func mainC3P45ManipulatingProcesses() {
