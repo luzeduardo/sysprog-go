@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"sync"
@@ -18,15 +19,26 @@ func main() {
 	// mainC1P22Mutexes()
 }
 
+type CliConfig struct {
+	ErrStream, OutStream io.Writer
+}
+
+func app(words []string, cfg CliConfig) {
+	for _, w := range words {
+		if len(w)%2 == 0 {
+			fmt.Fprintf(cfg.OutStream, "word %s is even\n", w)
+		} else {
+			fmt.Fprintf(cfg.ErrStream, "word %s is odd\n", w)
+		}
+	}
+}
 func mainC3P54CliStdStreams() {
 	words := os.Args[1:]
 	if len(words) == 0 {
 		fmt.Fprintln(os.Stderr, "No words provided")
 		os.Exit(1)
 	} else {
-		for _, word := range words {
-			fmt.Fprintln(os.Stdout, word)
-		}
+		app(words)
 	}
 }
 
