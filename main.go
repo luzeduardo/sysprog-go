@@ -19,8 +19,38 @@ func main() {
 	// mainC1P22Mutexes()
 }
 
+type Option func(*CliConfig) error
+
+func WithErrStream(errStream io.Writer) Option {
+	return func(c *CliConfig) error {
+		c.ErrStream = errStream
+		return nil
+	}
+}
+
+func WithOutStream(outStream io.Writer) Option {
+	return func(c *CliConfig) error {
+		c.OutStream = outStream
+		return nil
+	}
+}
+
 type CliConfig struct {
 	ErrStream, OutStream io.Writer
+}
+
+func NewCliConfig(optsFunc ...Option) (CliConfig, error) {
+	c := CliConfig{
+		ErrStream: os.Stderr,
+		OutStream: os.Stdout,
+	}
+
+	for _, optFn := range optsFunc {
+		if err := optFn(&c); err != nil {
+			return CliConfig{}, err
+		}
+	}
+	return c, nil
 }
 
 func app(words []string, cfg CliConfig) {
@@ -32,14 +62,19 @@ func app(words []string, cfg CliConfig) {
 		}
 	}
 }
+
 func mainC3P54CliStdStreams() {
 	words := os.Args[1:]
 	if len(words) == 0 {
 		fmt.Fprintln(os.Stderr, "No words provided")
 		os.Exit(1)
-	} else {
-		app(words)
 	}
+	cfg, err := NewCliConfig()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error creating config: %v\n", err)
+		os.Exit(1)
+	}
+	app(words, cfg)
 }
 
 func mainC3P45ManipulatingProcesses() {
