@@ -10,13 +10,32 @@ import (
 )
 
 func main() {
-	mainC3P54CliStdStreams()
+	mainC4P62FileStats()
+	// mainC3P54CliStdStreams()
 	// mainC3P45ManipulatingProcesses()
 	// mainC1P35SignalingChannel()
 	// mainC1P30BufferedChannels()
 	// mainC1ChannelWaitGroup()
 	// mainC1Channel()
 	// mainC1P22Mutexes()
+}
+
+func mainC4P62FileStats() {
+	info, err := os.Stat("main.go")
+	if err != nil {
+		if os.IsNotExist(err) {
+			fmt.Println("File does not exist")
+			return
+		} else {
+			panic(err)
+		}
+	}
+	fmt.Printf("File name: %s\n", info.Name())
+	fmt.Printf("Size: %v KB\n", info.Size()/1024)
+	fmt.Printf("Permissions: %s\n", info.Mode())
+	permissionString := fmt.Sprintf("%o", info.Mode().Perm())
+	fmt.Printf("Permission string: %s\n", permissionString)
+	fmt.Printf("Last modified: %v", info.ModTime())
 }
 
 type Option func(*CliConfig) error
