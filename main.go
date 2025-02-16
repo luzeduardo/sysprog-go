@@ -5,12 +5,14 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"sync"
 	"time"
 )
 
 func main() {
-	mainC4P62FileStats()
+	mainC4P66Filepath()
+	// mainC4P62FileStats()
 	// mainC3P54CliStdStreams()
 	// mainC3P45ManipulatingProcesses()
 	// mainC1P35SignalingChannel()
@@ -18,6 +20,23 @@ func main() {
 	// mainC1ChannelWaitGroup()
 	// mainC1Channel()
 	// mainC1P22Mutexes()
+}
+
+func mainC4P66Filepath() {
+	dir := "/home/user"
+	file := "document.txt"
+	//joining paths
+	fullPath := filepath.Join(dir, file)
+	fmt.Println(fullPath)
+	//cleaning paths
+	uncleanPath := "/home/user/../user2"
+	clearedPath := filepath.Clean(uncleanPath)
+	fmt.Println(clearedPath)
+
+	//splitting paths
+	joinedPath := "/home/user/documents/document.txt"
+	dirSplitted, fileSplitted := filepath.Split(joinedPath)
+	fmt.Printf("Dir: %s - file: %s", dirSplitted, fileSplitted)
 }
 
 func mainC4P62FileStats() {
