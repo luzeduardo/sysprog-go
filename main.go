@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -11,7 +12,8 @@ import (
 )
 
 func main() {
-	mainC4P66Filepath()
+	mainC4P68TraverssingDir()
+	// mainC4P66Filepath()
 	// mainC4P62FileStats()
 	// mainC3P54CliStdStreams()
 	// mainC3P45ManipulatingProcesses()
@@ -20,6 +22,10 @@ func main() {
 	// mainC1ChannelWaitGroup()
 	// mainC1Channel()
 	// mainC1P22Mutexes()
+}
+
+func mainC4P68TraverssingDir() {
+	mainC3P54CliStdStreams()
 }
 
 func mainC4P66Filepath() {
@@ -75,12 +81,14 @@ func WithOutStream(outStream io.Writer) Option {
 
 type CliConfig struct {
 	ErrStream, OutStream io.Writer
+	OutputFile           string
 }
 
 func NewCliConfig(optsFunc ...Option) (CliConfig, error) {
 	c := CliConfig{
-		ErrStream: os.Stderr,
-		OutStream: os.Stdout,
+		OutputFile: "",
+		ErrStream:  os.Stderr,
+		OutStream:  os.Stdout,
 	}
 
 	for _, optFn := range optsFunc {
@@ -91,20 +99,47 @@ func NewCliConfig(optsFunc ...Option) (CliConfig, error) {
 	return c, nil
 }
 
-func app(words []string, cfg CliConfig) {
-	for _, w := range words {
-		if len(w)%2 == 0 {
-			fmt.Fprintf(cfg.OutStream, "word %s is even\n", w)
-		} else {
-			fmt.Fprintf(cfg.ErrStream, "word %s is odd\n", w)
+func traverseDirs(rootDir []string, cfg CliConfig) {
+	var outputWriter io.Writer
+	if cfg.OutputFile != "" {
+		outputFile, err := os.Create(cfg.OutputFile)
+		if err != nil {
+			fmt.Fprintf(cfg.ErrStream, "Error creating output file: %v\n", err)
+			os.Exit(1)
+		}
+		defer outputFile.Close()
+		outputWriter = io.MultiWriter(cfg.OutStream, outputFile)
+	} else {
+		outputWriter = cfg.OutStream
+	}
+
+	for _, directory := range rootDir {
+		err := filepath.WalkDir(directory, func(path string, d os.DirEntry, err error) error {
+			if path == ".git" {
+				return filepath.SkipDir
+			}
+
+			if d.IsDir() {
+				fmt.Fprintf(outputWriter, "%s\n", path)
+			}
+			return nil
+		})
+
+		if err != nil {
+			fmt.Fprintf(cfg.ErrStream, "Error walking the path %q: %v\n", directory, err)
+			continue
 		}
 	}
 }
 
 func mainC3P54CliStdStreams() {
-	words := os.Args[1:]
-	if len(words) == 0 {
-		fmt.Fprintln(os.Stderr, "No words provided")
+	var outputFileName string
+	flag.StringVar(&outputFileName, "f", "", "Output file (default: stdout)")
+	flag.Parse()
+
+	rootDir := os.Args[1:]
+	if len(rootDir) == 0 {
+		fmt.Fprintln(os.Stderr, "No rootDir provided")
 		os.Exit(1)
 	}
 	cfg, err := NewCliConfig()
@@ -112,7 +147,7 @@ func mainC3P54CliStdStreams() {
 		fmt.Fprintf(os.Stderr, "Error creating config: %v\n", err)
 		os.Exit(1)
 	}
-	app(words, cfg)
+	traverseDirs(rootDir, cfg)
 }
 
 func mainC3P45ManipulatingProcesses() {
