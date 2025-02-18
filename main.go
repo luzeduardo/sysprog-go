@@ -12,7 +12,9 @@ import (
 )
 
 func main() {
-	mainC4P68TraverssingDir()
+	mainC4P73RemoveSymlink()
+	// mainC4P72CreateSymlink()
+	// mainC4P68TraverssingDir()
 	// mainC4P66Filepath()
 	// mainC4P62FileStats()
 	// mainC3P54CliStdStreams()
@@ -22,6 +24,29 @@ func main() {
 	// mainC1ChannelWaitGroup()
 	// mainC1Channel()
 	// mainC1P22Mutexes()
+}
+
+func mainC4P73RemoveSymlink() {
+	filePath := "shortcut_to_doc.txt"
+	err := os.Remove(filePath)
+	if err != nil {
+		fmt.Printf("Error removing the file: %v\n", err)
+		return
+	}
+	fmt.Printf("File removed: %s\n", filePath)
+}
+
+func mainC4P72CreateSymlink() {
+	sourcePath := "doc.txt"
+	symPath := "shortcut_to_doc.txt"
+
+	err := os.Symlink(sourcePath, symPath)
+	if err != nil {
+		fmt.Printf("Error creating symlink: %v\n", err)
+		return
+	}
+
+	fmt.Printf("Symlink created: %s -> %s\n", symPath, sourcePath)
 }
 
 func mainC4P68TraverssingDir() {
