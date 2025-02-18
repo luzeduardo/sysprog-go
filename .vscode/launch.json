@@ -11,7 +11,7 @@
         "mode": "auto",
         "cwd": "${workspaceRoot}",
         "program": "./",
-        "args": [],
+        "args": ["../fingo"],
         "env": {},
         "showLog": true
       },

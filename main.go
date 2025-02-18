@@ -7,12 +7,14 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 )
 
 func main() {
-	mainC4P73RemoveSymlink()
+	mainC4P76CalculateDirSize()
+	// mainC4P73RemoveSymlink()
 	// mainC4P72CreateSymlink()
 	// mainC4P68TraverssingDir()
 	// mainC4P66Filepath()
@@ -24,6 +26,30 @@ func main() {
 	// mainC1ChannelWaitGroup()
 	// mainC1Channel()
 	// mainC1P22Mutexes()
+}
+
+func mainC4P76CalculateDirSize() {
+	mainC3P54CliStdStreams()
+}
+
+func calculateSizeP75(path string) (int64, error) {
+	var size int64
+	err := filepath.Walk(path, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !info.IsDir() {
+			size += info.Size()
+		}
+		return nil
+	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	return size, nil
 }
 
 func mainC4P73RemoveSymlink() {
@@ -161,7 +187,7 @@ func traverseDirs(rootDir []string, cfg CliConfig) {
 				}
 			}
 
-			if path == ".git" {
+			if strings.Contains(path, ".git") || path == ".git" {
 				return filepath.SkipDir
 			}
 
@@ -175,6 +201,34 @@ func traverseDirs(rootDir []string, cfg CliConfig) {
 			fmt.Fprintf(cfg.ErrStream, "Error walking the path %q: %v\n", directory, err)
 			continue
 		}
+	}
+
+	m := map[string]int64{}
+	for _, directory := range rootDir {
+		dirSize, err := calculateSizeP75(directory)
+		if err != nil {
+			fmt.Fprintf(cfg.ErrStream, "Error calculating size of %s: %v\n", directory, err)
+			continue
+		}
+		m[directory] = dirSize
+	}
+
+	for dir, size := range m {
+		var unit string
+		switch {
+		case size < 1024:
+			unit = "B"
+		case size < 1024*1024:
+			size /= 1024
+			unit = "KB"
+		case size < 1024*1024*1024:
+			size /= 1024 * 1024
+			unit = "MB"
+		default:
+			size /= 1024 * 1024 * 1024
+			unit = "GB"
+		}
+		fmt.Fprintf(outputWriter, "%s - %d%s\n", dir, size, unit)
 	}
 }
 
