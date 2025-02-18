@@ -140,6 +140,27 @@ func traverseDirs(rootDir []string, cfg CliConfig) {
 
 	for _, directory := range rootDir {
 		err := filepath.WalkDir(directory, func(path string, d os.DirEntry, err error) error {
+			if err != nil {
+				fmt.Fprintf(cfg.ErrStream, "Error accessing the path %q: %v\n", path, err)
+			}
+
+			info, _ := d.Info()
+			if info.Mode()&os.ModeSymlink != 0 {
+				target, err := os.Readlink(path)
+				if err != nil {
+					fmt.Fprintf(cfg.ErrStream, "Error reading the symlink %q: %v\n", path, err)
+				} else {
+					_, err := os.Stat(target) //check if target of the symlink exists
+					if err != nil {
+						if os.IsNotExist(err) {
+							fmt.Fprintf(outputWriter, "Broken symlink found: %s -> %s\n", path, target)
+						} else {
+							fmt.Fprintf(cfg.ErrStream, "Error reading the symlink target %s: %v\n", target, err)
+						}
+					}
+				}
+			}
+
 			if path == ".git" {
 				return filepath.SkipDir
 			}
