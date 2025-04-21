@@ -44,6 +44,9 @@ func mainPlayGoroutines() {
 	go func() {
 		defer wg.Done()
 		for count := 0; count < 3; count++ {
+			if count == 1 {
+				time.Sleep(5 * time.Second)
+			}
 			for ch := 'a'; ch < 'a'+26; ch++ {
 				fmt.Printf("%c ", ch)
 			}
@@ -54,6 +57,9 @@ func mainPlayGoroutines() {
 	go func() {
 		defer wg.Done()
 		for count := 0; count < 3; count++ {
+			if count == 0 {
+				time.Sleep(1 * time.Second)
+			}
 			for n := 1; n <= 26; n++ {
 				fmt.Printf("%d ", n)
 			}
