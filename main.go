@@ -4,28 +4,119 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
 )
 
 func main() {
-	mainC4P76CalculateDirSize()
-	// mainC4P73RemoveSymlink()
-	// mainC4P72CreateSymlink()
-	// mainC4P68TraverssingDir()
-	// mainC4P66Filepath()
-	// mainC4P62FileStats()
-	// mainC3P54CliStdStreams()
-	// mainC3P45ManipulatingProcesses()
-	// mainC1P35SignalingChannel()
-	// mainC1P30BufferedChannels()
-	// mainC1ChannelWaitGroup()
-	// mainC1Channel()
 	// mainC1P22Mutexes()
+	// mainC1Channel()
+	// mainC1ChannelWaitGroup()
+	// mainC1P30BufferedChannels()
+	// mainC1P35SignalingChannel()
+	// mainC3P45ManipulatingProcesses()
+	// mainC3P54CliStdStreams()
+	// mainC4P62FileStats()
+	// mainC4P66Filepath()
+	// mainC4P68TraverssingDir()
+	// mainC4P72CreateSymlink()
+	// mainC4P73RemoveSymlink()
+	// mainC4P76CalculateDirSize()
+	// fmt.Println("Hello from main")
+	// go sayHello(&ch, "Oi")
+	// mainConsumerProducer()
+	mainPlayGoroutines()
+}
+
+func mainPlayGoroutines() {
+	//Allocate 1 logical processor for the scheduler to use
+	runtime.GOMAXPROCS(1)
+	var wg sync.WaitGroup
+	wg.Add(2)
+	fmt.Println("Starting Goroutines")
+
+	go func() {
+		defer wg.Done()
+		for count := 0; count < 3; count++ {
+			for ch := 'a'; ch < 'a'+26; ch++ {
+				fmt.Printf("%c ", ch)
+			}
+			fmt.Println()
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		for count := 0; count < 3; count++ {
+			for n := 1; n <= 26; n++ {
+				fmt.Printf("%d ", n)
+			}
+			fmt.Println()
+		}
+	}()
+
+	fmt.Println("Waiting to Finish")
+	wg.Wait()
+	fmt.Println("\n Terminating the program")
+}
+
+func producer(ch chan int) {
+	for i := 0; i < 5; i++ {
+		fmt.Printf("Produced %d\n", i)
+		ch <- i
+	}
+	close(ch)
+}
+
+func consumer(ch chan int) {
+	for item := range ch {
+		fmt.Printf("Consumed %d\n", item)
+		time.Sleep(2 * time.Second)
+	}
+}
+
+func mainConsumerProducer() {
+	ch := make(chan int, 2)
+	go producer(ch)
+	go consumer(ch)
+	time.Sleep(10 * time.Second)
+}
+
+// func sayMessage(ch chan, message string) {
+// 	ch <- message
+// 	// fmt.Println("Hello from goroutine")
+// }
+
+// func printMessage() {
+
+// }
+
+func computeFileHash(path string) (string, error) {
+	return "", nil
+}
+
+func findDuplicatesFilesP77(rootDir string) (map[string][]string, error) {
+	duplicates := make(map[string][]string)
+	err := filepath.Walk(rootDir, func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			hash, err := computeFileHash(path)
+			if err != nil {
+				return err
+			}
+			duplicates[hash] = append(duplicates[hash], path)
+		}
+		return nil
+	})
+	return duplicates, err
 }
 
 func mainC4P76CalculateDirSize() {
