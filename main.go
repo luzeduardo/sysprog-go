@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -31,7 +32,65 @@ func main() {
 	// fmt.Println("Hello from main")
 	// go sayHello(&ch, "Oi")
 	// mainConsumerProducer()
-	mainPlayGoroutines()
+	// mainPlayGoroutines()
+	mainBlockedGoroutine()
+}
+
+var worker int
+
+func mainBlockedGoroutine() {
+	// https://medium.com/@mukeshpilaniya/go-schedular-768c2246cdec
+	ch := make(chan string)
+	done := make(chan bool)
+
+	var mu sync.Mutex
+
+	var wg sync.WaitGroup
+
+	for i := 1; i < 100; i++ {
+		wg.Add(1)
+		go workerCount(&wg, &mu, ch)
+	}
+
+	wg.Add(2)
+	go writeToFile(&wg)
+	go printWorker(&wg, done, ch)
+	//wait the program to finish
+	wg.Wait()
+	<-done                        //blocked on channel
+	<-time.After(1 * time.Second) //blocked on timer
+	close(ch)
+	close(done)
+}
+
+func writeToFile(wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	file, _ := os.OpenFile("file.txt", os.O_RDWR|os.O_CREATE, 0755)
+	resp, _ := http.Get("https://mukeshpilaniya.github.io/posts/Go-Schedular/")
+	body, _ := io.ReadAll(resp.Body)
+
+	file.WriteString(string(body))
+}
+
+func workerCount(wg *sync.WaitGroup, m *sync.Mutex, ch chan string) {
+	// Lock the mutex to ensure exclusive access to the state
+	// Increment the value then Unlock the mutex
+	m.Lock()
+
+	worker = worker + 1
+	ch <- fmt.Sprintf("Worker %d is ready", worker)
+
+	m.Unlock()
+	wg.Done()
+}
+
+func printWorker(wg *sync.WaitGroup, done chan bool, ch chan string) {
+	for i := 0; i < 100; i++ {
+		fmt.Println(<-ch)
+	}
+	wg.Done()
+	done <- true
 }
 
 func mainPlayGoroutines() {
